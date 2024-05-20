@@ -17,11 +17,12 @@ type TNGFState = 'forever' | 'stop';
 
 class NaiGenerateForever {
     // 標準の生成ボタンのセレクタ
-    static BTN_SELECTOR = '#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button';
+    static BTN_SELECTOR =
+        '#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button[data-confirm-added="true"]';
     // 標準のプロンプトエリアのセレクタ
     static PROMPT_SELECTOR = "textarea[placeholder='プロンプトを入力し、理想の画像を生成しましょう']";
     // 標準の生成ボタン
-    generateButton: HTMLButtonElement | null = null;
+    // generateButton: HTMLButtonElement | null = null;
     // 生成回数カウンタ
     generateCount: number = 0;
     // 追加で作成するエレメントのコントローラー
@@ -51,12 +52,16 @@ class NaiGenerateForever {
         }, 3000);
     }
 
+    get generateButton() {
+        return document.querySelector(NaiGenerateForever.BTN_SELECTOR) as HTMLButtonElement;
+    }
+
     /**
      * 生成ボタンを変数に格納する
      * ボタンが画面から消えていたら配置もする
      */
     resetElements() {
-        this.generateButton = document.querySelector(NaiGenerateForever.BTN_SELECTOR);
+        // this.generateButton = document.querySelector(NaiGenerateForever.BTN_SELECTOR);
 
         // インペイント画面などで生成ボタンが無ければ抜ける
         if (!this.generateButton) return;
@@ -98,12 +103,14 @@ class NaiGenerateForever {
         this.generateImage();
     }
 
-    generateImage() {
+    async generateImage() {
         if (this.state === 'forever' && this.generateButton && !this.generateButton.disabled) {
             this.generateCount += 1;
             this.elmCtrl.setCounter(this.generateCount);
 
             // this.setPrompt(this.promptCtrl.getRandomPrompt());
+            await this.naildCard();
+
             this.generateButton.click();
         }
 
@@ -120,6 +127,17 @@ class NaiGenerateForever {
                 this.generateImage();
             }, timing);
         }
+    }
+
+    /**
+     * Naildcardがインストールされていたら実行する
+     */
+    naildCard() {
+        const diceBtn = document.getElementById('dice-button');
+        if (!diceBtn) return;
+
+        diceBtn.click();
+        return new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     // get promptElement() {

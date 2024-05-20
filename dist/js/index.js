@@ -160,7 +160,7 @@ class ElementControl {
 const _NaiGenerateForever = class _NaiGenerateForever {
   constructor() {
     // 標準の生成ボタン
-    __publicField(this, "generateButton", null);
+    // generateButton: HTMLButtonElement | null = null;
     // 生成回数カウンタ
     __publicField(this, "generateCount", 0);
     // 追加で作成するエレメントのコントローラー
@@ -182,12 +182,14 @@ const _NaiGenerateForever = class _NaiGenerateForever {
       this.resetElements();
     }, 3e3);
   }
+  get generateButton() {
+    return document.querySelector(_NaiGenerateForever.BTN_SELECTOR);
+  }
   /**
    * 生成ボタンを変数に格納する
    * ボタンが画面から消えていたら配置もする
    */
   resetElements() {
-    this.generateButton = document.querySelector(_NaiGenerateForever.BTN_SELECTOR);
     if (!this.generateButton)
       return;
     const parent = this.generateButton.parentNode;
@@ -212,10 +214,11 @@ const _NaiGenerateForever = class _NaiGenerateForever {
     this.state = "forever";
     this.generateImage();
   }
-  generateImage() {
+  async generateImage() {
     if (this.state === "forever" && this.generateButton && !this.generateButton.disabled) {
       this.generateCount += 1;
       this.elmCtrl.setCounter(this.generateCount);
+      await this.naildCard();
       this.generateButton.click();
     }
     if (this.elmCtrl.batchCount > 0 && this.generateCount >= this.elmCtrl.batchCount) {
@@ -226,6 +229,16 @@ const _NaiGenerateForever = class _NaiGenerateForever {
         this.generateImage();
       }, timing);
     }
+  }
+  /**
+   * Naildcardがインストールされていたら実行する
+   */
+  naildCard() {
+    const diceBtn = document.getElementById("dice-button");
+    if (!diceBtn)
+      return;
+    diceBtn.click();
+    return new Promise((resolve) => setTimeout(resolve, 500));
   }
   // get promptElement() {
   //     return document.querySelector(NaiGenerateForever.PROMPT_SELECTOR) as TPromptElement;
@@ -241,7 +254,7 @@ const _NaiGenerateForever = class _NaiGenerateForever {
   // }
 };
 // 標準の生成ボタンのセレクタ
-__publicField(_NaiGenerateForever, "BTN_SELECTOR", "#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button");
+__publicField(_NaiGenerateForever, "BTN_SELECTOR", '#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button[data-confirm-added="true"]');
 // 標準のプロンプトエリアのセレクタ
 __publicField(_NaiGenerateForever, "PROMPT_SELECTOR", "textarea[placeholder='プロンプトを入力し、理想の画像を生成しましょう']");
 let NaiGenerateForever = _NaiGenerateForever;

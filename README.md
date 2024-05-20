@@ -2,6 +2,8 @@
 
 NAI にバッチカウント機能を追加します。
 
+[Naildcard](https://github.com/xmitoux/naildcard) がインストールされていたらNaildcardを実行してから生成します。
+
 <img src="./img/screenshot.png">
 
 
