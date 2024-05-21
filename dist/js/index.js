@@ -157,10 +157,12 @@ class ElementControl {
     this.elementContainer.appendChild(inputContainer);
   }
 }
-const _NaiGenerateForever = class _NaiGenerateForever {
+const BUTTON_TEXT_GENERATE_EN = "Generate";
+const BUTTON_TEXT_GENERATE_JA = "生成";
+class NaiGenerateForever {
   constructor() {
     // 標準の生成ボタン
-    // generateButton: HTMLButtonElement | null = null;
+    __publicField(this, "generateButton", null);
     // 生成回数カウンタ
     __publicField(this, "generateCount", 0);
     // 追加で作成するエレメントのコントローラー
@@ -182,14 +184,25 @@ const _NaiGenerateForever = class _NaiGenerateForever {
       this.resetElements();
     }, 3e3);
   }
-  get generateButton() {
-    return document.querySelector(_NaiGenerateForever.BTN_SELECTOR);
+  /**
+   * 生成ボタンを取得
+   */
+  getGenerateButton() {
+    const buttons = [...document.querySelectorAll("button")];
+    for (const button of buttons) {
+      const buttonText = button.textContent;
+      if ((buttonText == null ? void 0 : buttonText.includes(BUTTON_TEXT_GENERATE_EN)) || (buttonText == null ? void 0 : buttonText.includes(BUTTON_TEXT_GENERATE_JA))) {
+        return button;
+      }
+    }
+    return void 0;
   }
   /**
    * 生成ボタンを変数に格納する
    * ボタンが画面から消えていたら配置もする
    */
   resetElements() {
+    this.generateButton = this.getGenerateButton();
     if (!this.generateButton)
       return;
     const parent = this.generateButton.parentNode;
@@ -252,12 +265,12 @@ const _NaiGenerateForever = class _NaiGenerateForever {
   // getPrompt(): string {
   //     return this.promptElement.value;
   // }
-};
-// 標準の生成ボタンのセレクタ
-__publicField(_NaiGenerateForever, "BTN_SELECTOR", '#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button[data-confirm-added="true"]');
+}
+// // 標準の生成ボタンのセレクタ
+// static BTN_SELECTOR =
+//     '#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button[data-confirm-added="true"]';
 // 標準のプロンプトエリアのセレクタ
-__publicField(_NaiGenerateForever, "PROMPT_SELECTOR", "textarea[placeholder='プロンプトを入力し、理想の画像を生成しましょう']");
-let NaiGenerateForever = _NaiGenerateForever;
+__publicField(NaiGenerateForever, "PROMPT_SELECTOR", "textarea[placeholder='プロンプトを入力し、理想の画像を生成しましょう']");
 (function() {
   setTimeout(() => {
     new NaiGenerateForever();

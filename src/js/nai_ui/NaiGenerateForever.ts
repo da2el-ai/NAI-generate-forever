@@ -15,14 +15,17 @@ type TNGFState = 'forever' | 'stop';
 //     };
 // };
 
+const BUTTON_TEXT_GENERATE_EN = 'Generate';
+const BUTTON_TEXT_GENERATE_JA = '生成';
+
 class NaiGenerateForever {
-    // 標準の生成ボタンのセレクタ
-    static BTN_SELECTOR =
-        '#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button[data-confirm-added="true"]';
+    // // 標準の生成ボタンのセレクタ
+    // static BTN_SELECTOR =
+    //     '#__next > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(5) > button[data-confirm-added="true"]';
     // 標準のプロンプトエリアのセレクタ
     static PROMPT_SELECTOR = "textarea[placeholder='プロンプトを入力し、理想の画像を生成しましょう']";
     // 標準の生成ボタン
-    // generateButton: HTMLButtonElement | null = null;
+    generateButton: HTMLButtonElement | null = null;
     // 生成回数カウンタ
     generateCount: number = 0;
     // 追加で作成するエレメントのコントローラー
@@ -52,8 +55,19 @@ class NaiGenerateForever {
         }, 3000);
     }
 
-    get generateButton() {
-        return document.querySelector(NaiGenerateForever.BTN_SELECTOR) as HTMLButtonElement;
+    /**
+     * 生成ボタンを取得
+     */
+    getGenerateButton(): HTMLButtonElement | undefined {
+        const buttons = [...document.querySelectorAll<HTMLButtonElement>('button')];
+
+        for (const button of buttons) {
+            const buttonText = button.textContent;
+            if (buttonText?.includes(BUTTON_TEXT_GENERATE_EN) || buttonText?.includes(BUTTON_TEXT_GENERATE_JA)) {
+                return button;
+            }
+        }
+        return undefined;
     }
 
     /**
@@ -62,6 +76,7 @@ class NaiGenerateForever {
      */
     resetElements() {
         // this.generateButton = document.querySelector(NaiGenerateForever.BTN_SELECTOR);
+        this.generateButton = this.getGenerateButton() as HTMLButtonElement;
 
         // インペイント画面などで生成ボタンが無ければ抜ける
         if (!this.generateButton) return;
