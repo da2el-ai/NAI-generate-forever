@@ -1,6 +1,6 @@
 {
     "name": "NAI generate forever",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "NovelAIにバッチカウント機能を追加する",
     "manifest_version": 3,
     "icons": {

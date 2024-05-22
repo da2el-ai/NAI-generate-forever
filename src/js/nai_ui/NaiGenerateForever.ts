@@ -7,7 +7,7 @@
 import { ElementControl } from './ElementControl';
 // import { PromptControl } from './PromptControl';
 
-type TNGFState = 'forever' | 'stop';
+type TNGFState = 'forever' | 'foreverDice' | 'stop';
 
 // type TPromptElement = HTMLInputElement & {
 //     _valueTracker?: {
@@ -41,7 +41,10 @@ class NaiGenerateForever {
         // 操作エレメントコントローラー生成
         this.elmCtrl = new ElementControl({
             foreverFunc: () => {
-                this.generateForever();
+                this.generateForever('forever');
+            },
+            foreverDiceFunc: () => {
+                this.generateForever('foreverDice');
             },
             cancelFunc: () => {
                 this.cancelForever();
@@ -53,6 +56,13 @@ class NaiGenerateForever {
         setInterval(() => {
             this.resetElements();
         }, 3000);
+    }
+
+    /**
+     * Naildcard のダイスボタンを取得
+     */
+    get diceButton() {
+        return document.getElementById('dice-button');
     }
 
     /**
@@ -73,6 +83,7 @@ class NaiGenerateForever {
     /**
      * 生成ボタンを変数に格納する
      * ボタンが画面から消えていたら配置もする
+     * 一定間隔で setInterval により実行される
      */
     resetElements() {
         // this.generateButton = document.querySelector(NaiGenerateForever.BTN_SELECTOR);
@@ -85,6 +96,15 @@ class NaiGenerateForever {
 
         if (!parent.contains(this.elmCtrl.foreverButton)) {
             this.elmCtrl.attachElements(parent);
+        }
+
+        // Naildcardの有効・無効で forever dice ボタンを切り替える
+        if (this.elmCtrl.foreverDiceButton) {
+            if (this.diceButton) {
+                this.elmCtrl.foreverDiceButton.style.display = 'inline';
+            } else {
+                this.elmCtrl.foreverDiceButton.style.display = 'none';
+            }
         }
     }
 
@@ -102,7 +122,7 @@ class NaiGenerateForever {
     /**
      * 無限生成を開始
      */
-    generateForever() {
+    generateForever(state: TNGFState) {
         // this.cancelForever();
 
         this.generateCount = 0;
@@ -110,7 +130,7 @@ class NaiGenerateForever {
 
         // ボタンを開始状態にする
         this.elmCtrl.setStateActive();
-        this.state = 'forever';
+        this.state = state;
 
         // // オリジナルプロンプトの保存
         // this.promptCtrl.setOriginalPrompt(this.getPrompt());
@@ -119,12 +139,18 @@ class NaiGenerateForever {
     }
 
     async generateImage() {
-        if (this.state === 'forever' && this.generateButton && !this.generateButton.disabled) {
+        if (
+            (this.state === 'forever' || this.state === 'foreverDice') &&
+            this.generateButton &&
+            !this.generateButton.disabled
+        ) {
             this.generateCount += 1;
             this.elmCtrl.setCounter(this.generateCount);
 
             // this.setPrompt(this.promptCtrl.getRandomPrompt());
-            await this.naildCard();
+            if (this.state === 'foreverDice') {
+                await this.naildCard();
+            }
 
             this.generateButton.click();
         }
@@ -133,7 +159,7 @@ class NaiGenerateForever {
             // 指定数達したら終了
             this.cancelForever();
             //
-        } else if (this.state === 'forever') {
+        } else if (this.state === 'forever' || this.state === 'foreverDice') {
             // ランダム時間待機して再実行
             const timing = (Math.random() * this.elmCtrl.waitRandom + this.elmCtrl.waitSec) * 1000;
             // console.log(timing);

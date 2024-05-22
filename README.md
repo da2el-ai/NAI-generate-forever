@@ -6,6 +6,11 @@ NAI にバッチカウント機能を追加します。
 
 <img src="./img/screenshot.png">
 
+## Update
+
+- 2024.05.22: v2.1.0
+  - Naildcardを実行してから生成開始する `Forever dice` ボタンを追加
+  - `Forever` ボタンはNaildcardを実行しません
 
 ## Install
 

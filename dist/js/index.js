@@ -23,14 +23,17 @@ class ElementControl {
   constructor(opt) {
     __publicField(this, "elementContainer");
     __publicField(this, "foreverButton", null);
+    __publicField(this, "foreverDiceButton", null);
     __publicField(this, "cancelButton", null);
     __publicField(this, "waitSecInput", null);
     __publicField(this, "waitRandomInput", null);
     __publicField(this, "batchCountInput", null);
     __publicField(this, "counter", null);
     __publicField(this, "foreverFunc");
+    __publicField(this, "foreverDiceFunc");
     __publicField(this, "cancelFunc");
     this.foreverFunc = opt.foreverFunc;
+    this.foreverDiceFunc = opt.foreverDiceFunc;
     this.cancelFunc = opt.cancelFunc;
     this.elementContainer = document.createElement("div");
     this.elementContainer.classList.add(CLASS_CONTAINER);
@@ -64,18 +67,20 @@ class ElementControl {
    * 通常状態にする
    */
   setStateNormal() {
-    if (!this.foreverButton || !this.cancelButton)
+    if (!this.foreverDiceButton || !this.foreverButton || !this.cancelButton)
       return;
     this.foreverButton.classList.remove(CLASS_BUTTON_ACTIVE);
+    this.foreverDiceButton.classList.remove(CLASS_BUTTON_ACTIVE);
     this.cancelButton.classList.remove(CLASS_BUTTON_ACTIVE);
   }
   /**
    * 無限生成状態にする
    */
   setStateActive() {
-    if (!this.foreverButton || !this.cancelButton)
+    if (!this.foreverDiceButton || !this.foreverButton || !this.cancelButton)
       return;
     this.foreverButton.classList.add(CLASS_BUTTON_ACTIVE);
+    this.foreverDiceButton.classList.add(CLASS_BUTTON_ACTIVE);
     this.cancelButton.classList.add(CLASS_BUTTON_ACTIVE);
   }
   /**
@@ -104,6 +109,10 @@ class ElementControl {
     this.foreverButton.addEventListener("click", () => {
       this.foreverFunc();
     });
+    this.foreverDiceButton = this.$_createButtonElement("Forever dice");
+    this.foreverDiceButton.addEventListener("click", () => {
+      this.foreverDiceFunc();
+    });
     this.cancelButton = this.$_createButtonElement("Cancel");
     this.cancelButton.addEventListener("click", () => {
       this.cancelFunc();
@@ -114,6 +123,7 @@ class ElementControl {
     const buttonsContainer = document.createElement("div");
     buttonsContainer.classList.add(CLASS_BUTTON_CONTAINER);
     buttonsContainer.appendChild(this.foreverButton);
+    buttonsContainer.appendChild(this.foreverDiceButton);
     buttonsContainer.appendChild(this.cancelButton);
     buttonsContainer.appendChild(this.counter);
     this.elementContainer.appendChild(buttonsContainer);
@@ -173,7 +183,10 @@ class NaiGenerateForever {
     __publicField(this, "state", "stop");
     this.elmCtrl = new ElementControl({
       foreverFunc: () => {
-        this.generateForever();
+        this.generateForever("forever");
+      },
+      foreverDiceFunc: () => {
+        this.generateForever("foreverDice");
       },
       cancelFunc: () => {
         this.cancelForever();
@@ -183,6 +196,12 @@ class NaiGenerateForever {
     setInterval(() => {
       this.resetElements();
     }, 3e3);
+  }
+  /**
+   * Naildcard のダイスボタンを取得
+   */
+  get diceButton() {
+    return document.getElementById("dice-button");
   }
   /**
    * 生成ボタンを取得
@@ -200,6 +219,7 @@ class NaiGenerateForever {
   /**
    * 生成ボタンを変数に格納する
    * ボタンが画面から消えていたら配置もする
+   * 一定間隔で setInterval により実行される
    */
   resetElements() {
     this.generateButton = this.getGenerateButton();
@@ -208,6 +228,13 @@ class NaiGenerateForever {
     const parent = this.generateButton.parentNode;
     if (!parent.contains(this.elmCtrl.foreverButton)) {
       this.elmCtrl.attachElements(parent);
+    }
+    if (this.elmCtrl.foreverDiceButton) {
+      if (this.diceButton) {
+        this.elmCtrl.foreverDiceButton.style.display = "inline";
+      } else {
+        this.elmCtrl.foreverDiceButton.style.display = "none";
+      }
     }
   }
   /**
@@ -220,23 +247,25 @@ class NaiGenerateForever {
   /**
    * 無限生成を開始
    */
-  generateForever() {
+  generateForever(state) {
     this.generateCount = 0;
     this.elmCtrl.setCounter(0);
     this.elmCtrl.setStateActive();
-    this.state = "forever";
+    this.state = state;
     this.generateImage();
   }
   async generateImage() {
-    if (this.state === "forever" && this.generateButton && !this.generateButton.disabled) {
+    if ((this.state === "forever" || this.state === "foreverDice") && this.generateButton && !this.generateButton.disabled) {
       this.generateCount += 1;
       this.elmCtrl.setCounter(this.generateCount);
-      await this.naildCard();
+      if (this.state === "foreverDice") {
+        await this.naildCard();
+      }
       this.generateButton.click();
     }
     if (this.elmCtrl.batchCount > 0 && this.generateCount >= this.elmCtrl.batchCount) {
       this.cancelForever();
-    } else if (this.state === "forever") {
+    } else if (this.state === "forever" || this.state === "foreverDice") {
       const timing = (Math.random() * this.elmCtrl.waitRandom + this.elmCtrl.waitSec) * 1e3;
       setTimeout(() => {
         this.generateImage();

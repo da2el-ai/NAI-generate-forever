@@ -8,6 +8,7 @@
 
 type TElementControlOption = {
     foreverFunc: () => void;
+    foreverDiceFunc: () => void;
     cancelFunc: () => void;
 };
 
@@ -35,12 +36,14 @@ const CLASS_COUNT_AREA = 'd2-count-area';
 class ElementControl {
     elementContainer: HTMLElement;
     foreverButton: HTMLElement | null = null;
+    foreverDiceButton: HTMLElement | null = null;
     cancelButton: HTMLElement | null = null;
     waitSecInput: HTMLInputElement | null = null;
     waitRandomInput: HTMLInputElement | null = null;
     batchCountInput: HTMLInputElement | null = null;
     counter: HTMLElement | null = null;
     foreverFunc: () => void;
+    foreverDiceFunc: () => void;
     cancelFunc: () => void;
 
     /**
@@ -49,6 +52,7 @@ class ElementControl {
      */
     constructor(opt: TElementControlOption) {
         this.foreverFunc = opt.foreverFunc;
+        this.foreverDiceFunc = opt.foreverDiceFunc;
         this.cancelFunc = opt.cancelFunc;
 
         // setStylesheet();
@@ -87,9 +91,10 @@ class ElementControl {
      * 通常状態にする
      */
     setStateNormal() {
-        if (!this.foreverButton || !this.cancelButton) return;
+        if (!this.foreverDiceButton || !this.foreverButton || !this.cancelButton) return;
 
         this.foreverButton.classList.remove(CLASS_BUTTON_ACTIVE);
+        this.foreverDiceButton.classList.remove(CLASS_BUTTON_ACTIVE);
         this.cancelButton.classList.remove(CLASS_BUTTON_ACTIVE);
     }
 
@@ -97,9 +102,10 @@ class ElementControl {
      * 無限生成状態にする
      */
     setStateActive() {
-        if (!this.foreverButton || !this.cancelButton) return;
+        if (!this.foreverDiceButton || !this.foreverButton || !this.cancelButton) return;
 
         this.foreverButton.classList.add(CLASS_BUTTON_ACTIVE);
+        this.foreverDiceButton.classList.add(CLASS_BUTTON_ACTIVE);
         this.cancelButton.classList.add(CLASS_BUTTON_ACTIVE);
     }
 
@@ -132,6 +138,11 @@ class ElementControl {
             this.foreverFunc();
         });
 
+        this.foreverDiceButton = this.$_createButtonElement('Forever dice');
+        this.foreverDiceButton.addEventListener('click', () => {
+            this.foreverDiceFunc();
+        });
+
         this.cancelButton = this.$_createButtonElement('Cancel');
         this.cancelButton.addEventListener('click', () => {
             this.cancelFunc();
@@ -145,6 +156,7 @@ class ElementControl {
         const buttonsContainer = document.createElement('div');
         buttonsContainer.classList.add(CLASS_BUTTON_CONTAINER);
         buttonsContainer.appendChild(this.foreverButton);
+        buttonsContainer.appendChild(this.foreverDiceButton);
         buttonsContainer.appendChild(this.cancelButton);
         buttonsContainer.appendChild(this.counter);
         this.elementContainer.appendChild(buttonsContainer);
